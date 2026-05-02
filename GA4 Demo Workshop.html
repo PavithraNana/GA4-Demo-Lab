@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GA4 Interactive Lab - Digital Detective</title>
+    
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* Smooth fade-in animation for revealed steps */
+        @keyframes slideUpFade {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .reveal-anim {
+            animation: slideUpFade 0.5s ease-out forwards;
+        }
+        body { font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-200 min-h-screen flex flex-col md:flex-row overflow-hidden">
+
+    <!-- Sidebar Navigation -->
+    <div class="w-full md:w-80 bg-slate-900 border-r border-slate-800 p-6 flex flex-col h-auto md:h-screen overflow-y-auto shrink-0">
+        <div class="mb-8">
+            <h1 class="text-2xl font-bold text-white flex items-center gap-3">
+                <i class="fa-solid fa-chart-simple text-sky-400"></i>
+                Digital Detective
+            </h1>
+            <p class="text-slate-400 text-sm mt-2">GA4 Interactive Lab</p>
+        </div>
+
+        <div class="space-y-3 flex-grow" id="sidebar-missions">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4">Training Missions</p>
+            <!-- Mission buttons injected via JS -->
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="flex-1 p-6 md:p-12 h-screen overflow-y-auto" id="main-content">
+        <!-- Content injected via JS -->
+    </div>
+
+    <script>
+        // Mission Data
+        const missions = [
+            {
+                id: 1,
+                title: "The Landing Page Hook",
+                tag: "Engagement",
+                scenario: "The marketing team spends heavily to drive traffic to various product categories. They want to know:",
+                question: "Which category landing page acts as the best 'hook' and keeps users engaged the longest?",
+                logic: "As an analyst, I know that high traffic ≠ high quality. If we simply look at 'Sessions,' we might just be finding the page with the most clickbait ads. Instead, we need to locate the Landing Page dimension and cross-reference it directly with the Engagement Rate metric.",
+                navigation: [
+                    "Go to Reports > Life cycle on the left menu.",
+                    "Expand Engagement and click Landing page.",
+                    "Click the Sessions column header to sort the table highest to lowest.",
+                    "Scroll horizontally to locate and read the Engagement rate column for the top rows."
+                ],
+                insight: "Men's Apparel drives massive volume (12.4k sessions) but has a poor 41% Engagement Rate. Drinkware has lower volume (8.2k) but an excellent 68% Engagement Rate.",
+                recommendation: "Conduct an immediate UX audit on the Men's Apparel landing page. Slow images or broken filters may be causing rapid bounces."
+            },
+            {
+                id: 2,
+                title: "Battle of the Brands",
+                tag: "Monetization",
+                scenario: "Internal politics are heating up. The team managing 'Android' apparel wants the main homepage banner, but the 'YouTube' apparel team disagrees.",
+                question: "Which brand actually generates more revenue and deserves the homepage spotlight?",
+                logic: "The default Ecommerce report shows 'Item name' (granular products like one specific t-shirt). This is too detailed for a high-level brand decision. We must use the dropdown feature to change the primary dimension to 'Item brand' to aggregate the data, then compare the revenue.",
+                navigation: [
+                    "Go to Reports > Monetization > Ecommerce purchases.",
+                    "Click the downward arrow next to the primary dimension header (Item name).",
+                    "Select Item brand from the dropdown list.",
+                    "Use the search bar above the table to search for 'Android' and then 'YouTube'. Compare their Item revenue."
+                ],
+                insight: "Android merchandise generates roughly 4x more revenue ($18.5k) compared to YouTube merchandise ($4.4k).",
+                recommendation: "Award Android the primary homepage banner due to superior view-to-purchase conversion. Move YouTube to secondary placements."
+            },
+            {
+                id: 3,
+                title: "The Browser Bottleneck",
+                tag: "Tech & Conversions",
+                scenario: "Developers just updated the site's checkout code, and revenue dipped slightly today.",
+                question: "Is the 'Add to Cart' functionality broken for users on specific web browsers (like Safari vs. Chrome)?",
+                logic: "A sudden drop might be a tech glitch. We need to view 'Tech details' by 'Browser'. However, the default 'Conversions' column totals ALL events combined. To accurately diagnose this specific funnel step, we must filter the Conversions column to ONLY show the add_to_cart event.",
+                navigation: [
+                    "Go to Reports > Tech > Tech details.",
+                    "Ensure the primary dimension is set to Browser.",
+                    "Scroll right to the Conversions column and click the 'All events' dropdown menu.",
+                    "Select the add_to_cart event to isolate it, then compare Chrome vs. Safari row data."
+                ],
+                insight: "Chrome users successfully initiate add_to_cart at a 5.2% rate, whereas Safari users are failing, sitting at a 0.8% rate.",
+                recommendation: "Log an urgent priority ticket to the QA team to test 'Add to Cart' functionality on macOS and iOS Safari browsers immediately."
+            },
+            {
+                id: 4,
+                title: "The Discovery Gap",
+                tag: "Custom Explorations",
+                scenario: "The UX team fears the store's navigation menu is too confusing for new users.",
+                question: "Exactly what percentage of users arrive at the site, but leave before ever viewing a specific product?",
+                logic: "Pre-built standard reports do not easily show custom, step-by-step abandonment rates. To answer this, we must build an advanced Custom Funnel Exploration. Step 1 will be arriving at the site (session_start), and Step 2 will be discovering a product (view_item).",
+                navigation: [
+                    "Click Explore on the left menu and open a Blank template.",
+                    "Under Tab Settings > Technique, choose Funnel exploration.",
+                    "Scroll down to Steps and click the pencil icon.",
+                    "Step 1: Add condition 'session_start'. Step 2: Add condition 'view_item'.",
+                    "Click Apply and analyze the visual abandonment gap."
+                ],
+                insight: "Severe upper-funnel friction exists. 58% of all traffic abandons the store after starting a session without ever triggering a view_item event.",
+                recommendation: "Redesign the top half (above the fold) of the homepage to feature trending products directly, reducing clicks required to view items."
+            },
+            {
+                id: 5,
+                title: "The NPD Forecast",
+                tag: "New Product Development",
+                scenario: "The product team wants to invest in a new, premium line of 'Eco-Friendly Tech Accessories' but needs data to justify the R&D budget.",
+                question: "Is there existing consumer demand for sustainable/eco-friendly products on our store?",
+                logic: "We shouldn't launch new products based on gut feelings. We can use the Ecommerce purchases report and utilize the search filter to isolate items containing 'Eco' or 'Recycled' to see if they generate meaningful revenue and high purchase volume.",
+                navigation: [
+                    "Go to Reports > Monetization > Ecommerce purchases.",
+                    "Ensure the primary dimension is set to Item name.",
+                    "Click into the Search bar above the data table and type 'Eco'. Press Enter.",
+                    "Analyze the aggregated Item revenue and Items purchased for the filtered sustainable products."
+                ],
+                insight: "Current 'Eco' products (like the Google Eco Tee) show high traction, generating solid revenue with an above-average cart-to-purchase rate.",
+                recommendation: "Proceed with the NPD for Eco-Friendly Tech Accessories. The data proves our audience actively seeks sustainable merchandise, lowering the launch risk."
+            }
+        ];
+
+        // State Variables
+        let activeMissionIdx = 0;
+        let revealedSteps = 1;
+
+        // Render Functions
+        function renderSidebar() {
+            const container = document.getElementById('sidebar-missions');
+            let html = '<p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4">Training Missions</p>';
+            
+            missions.forEach((m, idx) => {
+                const isActive = idx === activeMissionIdx;
+                const baseClasses = "w-full text-left px-4 py-3 rounded-lg transition-all duration-200 border";
+                const activeClasses = isActive ? "bg-sky-900/30 border-sky-500/50 text-sky-300" : "bg-slate-800/50 border-transparent text-slate-400 hover:bg-slate-800 hover:text-slate-200";
+                
+                html += `
+                    <button onclick="changeMission(${idx})" class="${baseClasses} ${activeClasses} mb-3">
+                        <div class="flex items-center justify-between">
+                            <span class="font-medium text-sm">Mission 0${m.id}</span>
+                            ${isActive ? '<i class="fa-solid fa-circle-play text-sky-400"></i>' : ''}
+                        </div>
+                        <div class="text-xs mt-1 truncate opacity-80">${m.title}</div>
+                    </button>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function renderMainContent() {
+            const mission = missions[activeMissionIdx];
+            const container = document.getElementById('main-content');
+            
+            let html = `
+                <div class="max-w-4xl mx-auto pb-12">
+                    <!-- Mission Header -->
+                    <div class="mb-10">
+                        <span class="inline-block px-3 py-1 bg-slate-800 text-sky-400 text-xs font-bold rounded-full mb-4">
+                            ${mission.tag}
+                        </span>
+                        <h2 class="text-4xl font-bold text-white mb-4">${mission.title}</h2>
+                        <p class="text-lg text-slate-400 leading-relaxed border-l-4 border-slate-700 pl-4">
+                            ${mission.scenario}
+                        </p>
+                    </div>
+
+                    <!-- Step 1: Objective (Always Visible) -->
+                    <div class="mb-6 bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-lg">
+                        <div class="px-6 py-4 bg-slate-800/50 border-b border-slate-800 flex items-center gap-3">
+                            <i class="fa-solid fa-bullseye text-sky-400 text-xl"></i>
+                            <h3 class="text-lg font-bold text-white">Phase 1: The Objective</h3>
+                        </div>
+                        <div class="p-6">
+                            <p class="text-xl font-medium text-slate-200 italic">"${mission.question}"</p>
+                        </div>
+                    </div>
+            `;
+
+            // Step 2: Analyst Logic
+            if (revealedSteps >= 2) {
+                html += `
+                    <div class="mb-6 bg-slate-900 border border-purple-900/50 rounded-xl overflow-hidden shadow-lg reveal-anim">
+                        <div class="px-6 py-4 bg-purple-950/30 border-b border-purple-900/30 flex items-center gap-3">
+                            <i class="fa-solid fa-lightbulb text-purple-400 text-xl"></i>
+                            <h3 class="text-lg font-bold text-white">Phase 2: Analyst Logic</h3>
+                        </div>
+                        <div class="p-6">
+                            <p class="text-lg text-slate-300 leading-relaxed">${mission.logic}</p>
+                        </div>
+                    </div>
+                `;
+            } else {
+                html += `<button onclick="advanceStep()" class="w-full mb-6 p-4 rounded-xl border border-dashed border-slate-700 text-slate-500 hover:text-purple-400 hover:border-purple-500/50 hover:bg-purple-950/10 transition-all flex items-center justify-center gap-2 font-medium">
+                            <i class="fa-solid fa-lock"></i> Reveal Analyst Logic
+                         </button>`;
+            }
+
+            // Step 3: Navigation
+            if (revealedSteps >= 3) {
+                let navList = mission.navigation.map((step, idx) => `
+                    <li class="flex items-start gap-3">
+                        <div class="mt-1 bg-orange-900/30 text-orange-400 rounded-full w-6 h-6 flex items-center justify-center shrink-0 text-xs font-bold">
+                            ${idx + 1}
+                        </div>
+                        <p class="text-lg text-slate-300">${step}</p>
+                    </li>
+                `).join('');
+
+                html += `
+                    <div class="mb-6 bg-slate-900 border border-orange-900/50 rounded-xl overflow-hidden shadow-lg reveal-anim">
+                        <div class="px-6 py-4 bg-orange-950/30 border-b border-orange-900/30 flex items-center gap-3">
+                            <i class="fa-solid fa-compass text-orange-400 text-xl"></i>
+                            <h3 class="text-lg font-bold text-white">Phase 3: GA4 Navigation Path</h3>
+                        </div>
+                        <div class="p-6">
+                            <ul class="space-y-4">${navList}</ul>
+                        </div>
+                    </div>
+                `;
+            } else if (revealedSteps === 2) {
+                html += `<button onclick="advanceStep()" class="w-full mb-6 p-4 rounded-xl border border-dashed border-slate-700 text-slate-500 hover:text-orange-400 hover:border-orange-500/50 hover:bg-orange-950/10 transition-all flex items-center justify-center gap-2 font-medium">
+                            <i class="fa-solid fa-lock"></i> Reveal GA4 Navigation Steps
+                         </button>`;
+            }
+
+            // Step 4: Report
+            if (revealedSteps >= 4) {
+                html += `
+                    <div class="mb-12 bg-slate-900 border border-emerald-900/50 rounded-xl overflow-hidden shadow-lg reveal-anim">
+                        <div class="px-6 py-4 bg-emerald-950/30 border-b border-emerald-900/30 flex items-center gap-3">
+                            <i class="fa-solid fa-file-signature text-emerald-400 text-xl"></i>
+                            <h3 class="text-lg font-bold text-white">Phase 4: Sample Analyst Report</h3>
+                        </div>
+                        <div class="p-6 space-y-4">
+                            <div class="bg-slate-950 p-4 rounded-lg border-l-4 border-sky-500">
+                                <h4 class="text-sky-400 font-bold mb-1 text-sm uppercase tracking-wider">The Insight</h4>
+                                <p class="text-slate-200">${mission.insight}</p>
+                            </div>
+                            <div class="bg-slate-950 p-4 rounded-lg border-l-4 border-emerald-500">
+                                <h4 class="text-emerald-400 font-bold mb-1 text-sm uppercase tracking-wider">Strategic Recommendation</h4>
+                                <p class="text-slate-200">${mission.recommendation}</p>
+                            </div>
+                        </div>
+                `;
+
+                if (activeMissionIdx < missions.length - 1) {
+                    html += `
+                        <div class="p-4 bg-slate-800/30 border-t border-slate-800 flex justify-end">
+                            <button onclick="changeMission(${activeMissionIdx + 1})" class="flex items-center gap-2 bg-sky-600 hover:bg-sky-500 text-white px-6 py-2 rounded-lg font-medium transition-colors">
+                                Load Next Mission <i class="fa-solid fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>`;
+                } else {
+                    html += `
+                        <div class="p-6 bg-emerald-900/20 border-t border-emerald-900/30 flex items-center justify-center gap-2 text-emerald-400 font-bold text-center">
+                            <i class="fa-solid fa-circle-check text-xl"></i>
+                            All Training Missions Completed. Ready for the Assessment!
+                        </div>
+                    </div>`;
+                }
+            } else if (revealedSteps === 3) {
+                html += `<button onclick="advanceStep()" class="w-full mb-12 p-4 rounded-xl border border-dashed border-slate-700 text-slate-500 hover:text-emerald-400 hover:border-emerald-500/50 hover:bg-emerald-950/10 transition-all flex items-center justify-center gap-2 font-medium">
+                            <i class="fa-solid fa-lock"></i> Reveal Final Analyst Report
+                         </button>`;
+            }
+
+            html += `</div>`; // Close max-w-4xl container
+            container.innerHTML = html;
+        }
+
+        // Actions
+        function advanceStep() {
+            if (revealedSteps < 4) {
+                revealedSteps++;
+                renderMainContent();
+                // Scroll to bottom smoothly
+                setTimeout(() => {
+                    const mainContent = document.getElementById('main-content');
+                    mainContent.scrollTo({ top: mainContent.scrollHeight, behavior: 'smooth' });
+                }, 50);
+            }
+        }
+
+        function changeMission(idx) {
+            activeMissionIdx = idx;
+            revealedSteps = 1;
+            renderSidebar();
+            renderMainContent();
+            document.getElementById('main-content').scrollTo(0, 0);
+        }
+
+        // Initialize App
+        renderSidebar();
+        renderMainContent();
+
+    </script>
+</body>
+</html>
